@@ -1,0 +1,6 @@
+@import "tailwindcss";
+.landing-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #fff7ed, #ffffff);
+  color: #1f2937; /* similar to text-gray-800 */
+}
