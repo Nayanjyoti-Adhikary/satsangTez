@@ -40,7 +40,7 @@ function Login() {
 
       if (response.ok) {
         setOtpSent(true);
-        setSuccess("OTP sent to your mobile");
+        setSuccess("OTP sent to your email");
       } else {
         setError(data.message);
       }
