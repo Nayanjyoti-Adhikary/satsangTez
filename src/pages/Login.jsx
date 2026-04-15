@@ -9,11 +9,11 @@ function Login() {
   const [mobile, setMobile] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(""); // State for UI success messages
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ NEW
 
   const backgroundImage =
     "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Main_Gate_of_Satsang_Ashram%2C_Deoghar.jpg/960px-Main_Gate_of_Satsang_Ashram%2C_Deoghar.jpg?20200305181752";
@@ -27,6 +27,8 @@ function Login() {
       return;
     }
 
+    setLoading(true);
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
         method: "POST",
@@ -38,18 +40,23 @@ function Login() {
 
       if (response.ok) {
         setOtpSent(true);
-        setSuccess("OTP sent to your mobile"); // Changed from alert
+        setSuccess("OTP sent to your mobile");
       } else {
         setError(data.message);
       }
     } catch (err) {
       setError("Server not reachable");
+    } finally {
+      setLoading(false);
     }
   }
 
   async function handleVerifyOtp() {
     setError("");
     setSuccess("");
+
+    setLoading(true);
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
         method: "POST",
@@ -68,12 +75,17 @@ function Login() {
       }
     } catch (err) {
       setError("Server not reachable");
+    } finally {
+      setLoading(false);
     }
   }
 
   async function handlePasswordLogin() {
     setError("");
     setSuccess("");
+
+    setLoading(true);
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login-password`, {
         method: "POST",
@@ -92,6 +104,8 @@ function Login() {
       }
     } catch (err) {
       setError("Server not reachable");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -103,7 +117,7 @@ function Login() {
       }}
     >
       <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
-        {/* ✅ FIXED HEADER */}
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
             Welcome Back
@@ -119,10 +133,10 @@ function Login() {
               setError("");
               setSuccess("");
             }}
-            className={`flex-1 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 ${
+            className={`flex-1 py-2.5 rounded-md text-sm font-semibold ${
               mode === "otp"
-                ? "bg-slate-800 text-white shadow-lg"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-slate-800 text-white"
+                : "text-slate-600"
             }`}
           >
             OTP Login
@@ -134,27 +148,26 @@ function Login() {
               setError("");
               setSuccess("");
             }}
-            className={`flex-1 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 ${
+            className={`flex-1 py-2.5 rounded-md text-sm font-semibold ${
               mode === "password"
-                ? "bg-slate-800 text-white shadow-lg"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-slate-800 text-white"
+                : "text-slate-600"
             }`}
           >
             Password Login
           </button>
         </div>
 
-        {/* Error Message */}
+        {/* Messages */}
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-6">
-            <p className="text-red-700 text-sm font-medium">{error}</p>
+          <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-4">
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
 
-        {/* Success Message */}
         {success && (
-          <div className="bg-green-50 border-l-4 border-green-500 p-3 mb-6">
-            <p className="text-green-700 text-sm font-medium">{success}</p>
+          <div className="bg-green-50 border-l-4 border-green-500 p-3 mb-4">
+            <p className="text-green-700 text-sm">{success}</p>
           </div>
         )}
 
@@ -166,30 +179,32 @@ function Login() {
                 placeholder="Mobile Number"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
-                className="w-full bg-white/50 border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none transition-all"
+                className="w-full border p-3 rounded-lg"
               />
 
               {!otpSent ? (
                 <button
                   onClick={handleSendOtp}
-                  className="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-lg font-bold shadow-lg transition-transform active:scale-[0.98]"
+                  disabled={loading}
+                  className="w-full bg-slate-800 text-white py-3 rounded-lg disabled:opacity-50"
                 >
-                  Send OTP
+                  {loading ? "Sending..." : "Send OTP"}
                 </button>
               ) : (
                 <>
                   <input
                     type="text"
-                    placeholder="Enter 6-digit OTP"
+                    placeholder="Enter OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full bg-white/50 border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+                    className="w-full border p-3 rounded-lg"
                   />
                   <button
                     onClick={handleVerifyOtp}
-                    className="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-lg font-bold shadow-lg transition-transform active:scale-[0.98]"
+                    disabled={loading}
+                    className="w-full bg-slate-800 text-white py-3 rounded-lg disabled:opacity-50"
                   >
-                    Verify & Login
+                    {loading ? "Verifying..." : "Verify & Login"}
                   </button>
                 </>
               )}
@@ -203,7 +218,7 @@ function Login() {
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-white/50 border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none transition-all"
+                className="w-full border p-3 rounded-lg"
               />
 
               <input
@@ -211,19 +226,20 @@ function Login() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white/50 border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none transition-all"
+                className="w-full border p-3 rounded-lg"
               />
 
               <button
                 onClick={handlePasswordLogin}
-                className="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-lg font-bold shadow-lg transition-transform active:scale-[0.98]"
+                disabled={loading}
+                className="w-full bg-slate-800 text-white py-3 rounded-lg disabled:opacity-50"
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
               </button>
 
               <button
                 onClick={() => navigate("/reset-password")}
-                className="text-blue-600 hover:text-blue-800 underline text-sm mt-2 block w-full text-left"
+                className="text-blue-600 underline text-sm"
               >
                 Forgot Password?
               </button>
