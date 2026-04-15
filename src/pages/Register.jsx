@@ -32,7 +32,22 @@ function Register() {
       setError("Please fill all required fields");
       return;
     }
-
+    if (!/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(form.username))
+    {
+      setError(" Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscore");
+      return;
+    }
+    if(!/^[6-9]\d{9}$/.test(form.mobile))
+    {
+      setError("Please Enter a Valid Mobile number");
+      return;
+    }
+    if(!/^d{12}$/.test(form.family_code))
+    {
+      setError("Family code must be exactly 12 digit");
+      return;
+    }
+    
     
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");

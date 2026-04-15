@@ -8,6 +8,7 @@ import AdminPage from "./pages/AdminPage";
 import LandingPage from "./pages/LandingPage";
 import Register from "./pages/Register";
 import Navbar from "./Components/Navbar";
+import Password from "./pages/Password";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route path="/" element={<LandingPage />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
+    <Route path="/reset-password" element={<Password />} />
       {/* Protected Routes */}
       <Route
         path="/dashboard"

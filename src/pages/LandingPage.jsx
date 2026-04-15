@@ -56,8 +56,7 @@ function LandingPage() {
           </h2>
           <p className="text-zinc-400 text-lg leading-relaxed">
             This system manages Bhog and Pronami collections with discipline,
-            transparency, and devotion — combining spiritual responsibility
-            with structured financial management.
+            transparency, and devotion .
           </p>
         </div>
       </section>

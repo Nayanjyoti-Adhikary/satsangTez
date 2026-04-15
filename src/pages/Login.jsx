@@ -9,15 +9,18 @@ function Login() {
   const [mobile, setMobile] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(""); // State for UI success messages
 
   const backgroundImage =
     "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Main_Gate_of_Satsang_Ashram%2C_Deoghar.jpg/960px-Main_Gate_of_Satsang_Ashram%2C_Deoghar.jpg?20200305181752";
 
   async function handleSendOtp() {
     setError("");
+    setSuccess("");
 
     if (!mobile) {
       setError("Mobile number required");
@@ -35,7 +38,7 @@ function Login() {
 
       if (response.ok) {
         setOtpSent(true);
-        alert("OTP sent to your email");
+        setSuccess("OTP sent to your mobile"); // Changed from alert
       } else {
         setError(data.message);
       }
@@ -45,6 +48,8 @@ function Login() {
   }
 
   async function handleVerifyOtp() {
+    setError("");
+    setSuccess("");
     try {
       const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
         method: "POST",
@@ -55,8 +60,9 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
+        setSuccess("Login successful! Redirecting...");
         localStorage.setItem("token", data.token);
-        navigate("/dashboard");
+        setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setError(data.message);
       }
@@ -66,6 +72,8 @@ function Login() {
   }
 
   async function handlePasswordLogin() {
+    setError("");
+    setSuccess("");
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login-password`, {
         method: "POST",
@@ -76,8 +84,9 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
+        setSuccess("Login successful! Redirecting...");
         localStorage.setItem("token", data.token);
-        navigate("/dashboard");
+        setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setError(data.message);
       }
@@ -94,21 +103,22 @@ function Login() {
       }}
     >
       <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
-
         {/* ✅ FIXED HEADER */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
             Welcome Back
           </h1>
-          <h2 className="text-sm text-slate-600 mt-1">
-            Jai guru
-          </h2>
+          <h2 className="text-sm text-slate-600 mt-1">Jai guru</h2>
         </div>
 
         {/* Toggle */}
         <div className="flex mb-8 p-1 bg-slate-200/50 rounded-lg">
           <button
-            onClick={() => setMode("otp")}
+            onClick={() => {
+              setMode("otp");
+              setError("");
+              setSuccess("");
+            }}
             className={`flex-1 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 ${
               mode === "otp"
                 ? "bg-slate-800 text-white shadow-lg"
@@ -119,7 +129,11 @@ function Login() {
           </button>
 
           <button
-            onClick={() => setMode("password")}
+            onClick={() => {
+              setMode("password");
+              setError("");
+              setSuccess("");
+            }}
             className={`flex-1 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 ${
               mode === "password"
                 ? "bg-slate-800 text-white shadow-lg"
@@ -130,9 +144,17 @@ function Login() {
           </button>
         </div>
 
+        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-6">
             <p className="text-red-700 text-sm font-medium">{error}</p>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {success && (
+          <div className="bg-green-50 border-l-4 border-green-500 p-3 mb-6">
+            <p className="text-green-700 text-sm font-medium">{success}</p>
           </div>
         )}
 
@@ -197,6 +219,13 @@ function Login() {
                 className="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-lg font-bold shadow-lg transition-transform active:scale-[0.98]"
               >
                 Login
+              </button>
+
+              <button
+                onClick={() => navigate("/reset-password")}
+                className="text-blue-600 hover:text-blue-800 underline text-sm mt-2 block w-full text-left"
+              >
+                Forgot Password?
               </button>
             </>
           )}

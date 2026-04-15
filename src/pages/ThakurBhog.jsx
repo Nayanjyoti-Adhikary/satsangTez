@@ -5,86 +5,105 @@ import SelectInput from "../Components/SelectInput";
 import PrimaryButton from "../Components/PrimaryButton";
 import PageCard from "../Components/PageCard";
 import API_BASE_URL from "../config/api";
+
 function ThakurBhog() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
     depositor: "",
     amount: "",
-    familyCode:"",//added family code
+    familyCode: "",
     bhogType: "Purna",
     date: "",
   });
 
-  const [errors,setErrors]=useState({});
- //we are making validation function
-  function validate(){
-  const newErrors={};
- if(!form.depositor.trim()){  //removed whitespaced leading and trailing and returns a new string    
-  newErrors.depositor="You have not entered the  Depositor Name"
- }
- if(!form.amount || Number(form.amount)<=0){
-  newErrors.amount="Enter a valid amount ";
- }
- if (!form.date) {
-    newErrors.date = "Date is required";
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState(""); // UI Success state
+  const [serverError, setServerError] = useState(""); // UI Server Error state
+
+  function validate() {
+    const newErrors = {};
+    if (!form.depositor.trim()) {
+      newErrors.depositor = "You have not entered the Depositor Name";
+    }
+    if (!form.amount || Number(form.amount) <= 0) {
+      newErrors.amount = "Enter a valid amount ";
+    }
+    if (!form.date) {
+      newErrors.date = "Date is required";
+    }
+    if (!form.familyCode) {
+      newErrors.familyCode = "Family Code is required";
+    } else if (!/^\d{12}$/.test(form.familyCode)) {
+      newErrors.familyCode = "Family Code must be exactly 12 digits";
+    }
+    return newErrors;
   }
-  //  Family Code Validation
-  if (!form.familyCode) {
-    newErrors.familyCode = "Family Code is required";
-  } else if (!/^\d{12}$/.test(form.familyCode)) {
-    newErrors.familyCode = "Family Code must be exactly 12 digits";
-  }
-  return newErrors;
-}
+
   function handleChange(e) {
     const { name, value } = e.target;
-
-  // Allow only digits for familyCode
-  if (name === "familyCode") {
-    if (!/^\d*$/.test(value)) return;
-  }
+    if (name === "familyCode") {
+      if (!/^\d*$/.test(value)) return;
+    }
     setForm({ ...form, [name]: value });
   }
 
- async function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    const errorValidation=validate();
+    setSuccess("");
+    setServerError("");
+    
+    const errorValidation = validate();
     setErrors(errorValidation);
-    if(Object.keys(errorValidation).length>0){
+    
+    if (Object.keys(errorValidation).length > 0) {
       return;
     }
-      try {
-    const token = localStorage.getItem("token");
 
-    const response = await fetch(`${API_BASE_URL}/bhog/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(form),
-    });
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/bhog/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      alert("Bhog entry saved successfully");
-      navigate("/dashboard");
-    } else {
-      alert(data.message);
+      if (response.ok) {
+        setSuccess("Bhog entry saved successfully!"); // Changed from alert
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      } else {
+        setServerError(data.message || "Failed to save entry"); // Changed from alert
+      }
+    } catch (error) {
+      console.error(error);
+      setServerError("Server error. Please try again later."); // Changed from alert
     }
-
-  } catch (error) {
-    console.error(error);
-    alert("Server error");
-  }
-    
   }
 
   return (
     <PageCard title="Thakur Bhog ">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Success Message */}
+        {success && (
+          <div className="bg-green-50 border border-green-300 text-green-600 text-sm p-3 rounded-lg mb-4">
+            {success}
+          </div>
+        )}
+
+        {/* Server-side Error Message */}
+        {serverError && (
+          <div className="bg-red-50 border border-red-300 text-red-600 text-sm p-3 rounded-lg mb-4">
+            {serverError}
+          </div>
+        )}
+
         <TextInput
           name="depositor"
           value={form.depositor}
@@ -101,14 +120,16 @@ function ThakurBhog() {
           placeholder="Amount (₹)"
           error={errors.amount}
         />
+        
         <TextInput
-        type="text"
-        name="familyCode"
-        placeholder="family code (12 digits exactly)"
-        value={form.familyCode}
-        maxLength={12}
-        onChange={handleChange}
-        error={errors.familyCode}/>
+          type="text"
+          name="familyCode"
+          placeholder="Family code (12 digits exactly)"
+          value={form.familyCode}
+          maxLength={12}
+          onChange={handleChange}
+          error={errors.familyCode}
+        />
 
         <SelectInput
           name="bhogType"
@@ -128,7 +149,7 @@ function ThakurBhog() {
           error={errors.date}
         />
 
-        <PrimaryButton>Submit Bhog Entry</PrimaryButton>
+        <PrimaryButton type="submit">Submit Bhog Entry</PrimaryButton>
       </form>
     </PageCard>
   );
