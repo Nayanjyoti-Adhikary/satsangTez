@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../config/api";
+
 function Register() {
   const navigate = useNavigate();
 
@@ -8,16 +9,17 @@ function Register() {
     name: "",
     username: "",
     mobile: "",
-    email:"", //added email
+    email: "", //added email
     family_code: "",
     mandir_code: "",
     password: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(""); // UI Success state
 
-  // Using a reliable placeholder image - you can replace '400x600' with your local thakur.jpg path
-  const thakurImage = "https://www.satsang.org.in/assets/Home/HeroSections/acharyaDeb_1.png"; 
+  // Using a reliable placeholder image
+  const thakurImage = "https://www.satsang.org.in/assets/Home/HeroSections/acharyaDeb_1.png";
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,29 +28,25 @@ function Register() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!form.name || !form.username || !form.mobile || !form.password || !form.family_code) {
-      
       setError("Please fill all required fields");
       return;
     }
-    if (!/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(form.username))
-    {
-      setError(" Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscore");
+    if (!/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(form.username)) {
+      setError("Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscore");
       return;
     }
-    if(!/^[6-9]\d{9}$/.test(form.mobile))
-    {
+    if (!/^[6-9]\d{9}$/.test(form.mobile)) {
       setError("Please Enter a Valid Mobile number");
       return;
     }
-    if (!/^\d{12}$/.test(form.family_code.trim())) 
-    {
+    if (!/^\d{12}$/.test(form.family_code.trim())) {
       setError("Family code must be exactly 12 digit");
       return;
     }
-    
-    
+
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -62,7 +60,7 @@ function Register() {
           name: form.name,
           username: form.username,
           mobile: form.mobile,
-          email:form.email,
+          email: form.email,
           family_code: form.family_code,
           mandir_code: form.mandir_code,
           password: form.password,
@@ -72,8 +70,10 @@ function Register() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Registration successful");
-        navigate("/login");
+        setSuccess("Registration successful! Redirecting to login..."); // Changed from alert
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       } else {
         setError(data.message);
       }
@@ -84,7 +84,6 @@ function Register() {
   }
 
   return (
-    // Changed to a Creamy Grey background for the whole page
     <div className="min-h-screen flex items-center justify-center bg-stone-100 p-6">
       
       {/* Container Card */}
@@ -111,9 +110,17 @@ function Register() {
           </h1>
           <p className="text-slate-500 mb-6 text-sm">Joi Guru and Welcome</p>
 
+          {/* Error Message Block */}
           {error && (
             <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-4">
               <p className="text-red-700 text-xs font-medium">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message Block */}
+          {success && (
+            <div className="bg-green-50 border-l-4 border-green-500 p-3 mb-4">
+              <p className="text-green-700 text-xs font-medium">{success}</p>
             </div>
           )}
 
