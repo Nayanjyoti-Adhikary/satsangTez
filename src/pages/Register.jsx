@@ -42,7 +42,7 @@ function Register() {
       setError("Please Enter a Valid Mobile number");
       return;
     }
-    if(!/^d{12}$/.test(form.family_code))
+    if (!/^\d{12}$/.test(form.family_code.trim())) 
     {
       setError("Family code must be exactly 12 digit");
       return;
