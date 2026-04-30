@@ -237,7 +237,7 @@ function Register() {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Creating Account...
+                  Creating your  Account... Please wait.....
                 </span>
               ) : (
                 "Sign Up"
