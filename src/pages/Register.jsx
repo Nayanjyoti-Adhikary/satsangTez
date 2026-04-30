@@ -9,17 +9,19 @@ function Register() {
     name: "",
     username: "",
     mobile: "",
-    email: "", //added email
+    email: "",
     family_code: "",
     mandir_code: "",
     password: "",
     confirmPassword: "",
   });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(""); // UI Success state
 
-  // Using a reliable placeholder image
-  const thakurImage = "https://www.satsang.org.in/assets/Home/HeroSections/acharyaDeb_1.png";
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ loading state added
+
+  const thakurImage =
+    "https://www.satsang.org.in/assets/Home/HeroSections/acharyaDeb_1.png";
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,28 +29,49 @@ function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (loading) return; // 🚫 prevent multiple submissions
+
     setError("");
     setSuccess("");
+    setLoading(true); // ✅ start loading
 
-    if (!form.name || !form.username || !form.mobile || !form.password || !form.family_code) {
+    // Validation
+    if (
+      !form.name ||
+      !form.username ||
+      !form.mobile ||
+      !form.password ||
+      !form.family_code
+    ) {
       setError("Please fill all required fields");
+      setLoading(false);
       return;
     }
+
     if (!/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(form.username)) {
-      setError("Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscore");
+      setError(
+        "Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscore"
+      );
+      setLoading(false);
       return;
     }
+
     if (!/^[6-9]\d{9}$/.test(form.mobile)) {
       setError("Please Enter a Valid Mobile number");
+      setLoading(false);
       return;
     }
+
     if (!/^\d{12}$/.test(form.family_code.trim())) {
       setError("Family code must be exactly 12 digit");
+      setLoading(false);
       return;
     }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
+      setLoading(false);
       return;
     }
 
@@ -70,30 +93,30 @@ function Register() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("Registration successful! Redirecting to login..."); // Changed from alert
+        setSuccess("Registration successful! Redirecting to login...");
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       } else {
-        setError(data.message);
+        setError(data.message || "Registration failed");
       }
     } catch (err) {
       console.error(err);
       setError("Server error");
+    } finally {
+      setLoading(false); // ✅ stop loading no matter what
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-stone-100 p-6">
-      
-      {/* Container Card */}
       <div className="flex flex-col md:flex-row bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl w-full border border-stone-200">
         
-        {/* Left Side: Image Panel */}
+        {/* Left Side */}
         <div className="md:w-1/2 relative hidden md:block bg-slate-800">
-          <img 
-            src={thakurImage} 
-            alt="Thakur Anukul Chandra" 
+          <img
+            src={thakurImage}
+            alt="Thakur Anukul Chandra"
             className="h-full w-full object-cover opacity-90"
           />
           <div className="absolute inset-0 bg-gradient-to from-black/60 to-transparent flex items-end p-8">
@@ -103,21 +126,23 @@ function Register() {
           </div>
         </div>
 
-        {/* Right Side: Form Panel */}
+        {/* Right Side */}
         <div className="md:w-1/2 p-8 md:p-10 bg-white">
           <h1 className="text-3xl font-bold mb-1 text-slate-800 tracking-tight">
             Create Account
           </h1>
-          <p className="text-slate-500 mb-6 text-sm">Joi Guru and Welcome</p>
+          <p className="text-slate-500 mb-6 text-sm">
+            Joi Guru and Welcome
+          </p>
 
-          {/* Error Message Block */}
+          {/* Error */}
           {error && (
             <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-4">
               <p className="text-red-700 text-xs font-medium">{error}</p>
             </div>
           )}
 
-          {/* Success Message Block */}
+          {/* Success */}
           {success && (
             <div className="bg-green-50 border-l-4 border-green-500 p-3 mb-4">
               <p className="text-green-700 text-xs font-medium">{success}</p>
@@ -131,7 +156,7 @@ function Register() {
               placeholder="Full Name"
               value={form.name}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none transition-all text-sm"
+              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none text-sm"
             />
 
             <input
@@ -140,7 +165,7 @@ function Register() {
               placeholder="Username"
               value={form.username}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none transition-all text-sm"
+              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none text-sm"
             />
 
             <input
@@ -149,17 +174,18 @@ function Register() {
               placeholder="Mobile Number"
               value={form.mobile}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none transition-all text-sm"
+              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none text-sm"
             />
-            
+
             <input
               type="text"
               name="email"
               placeholder="Email"
               value={form.email}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none transition-all text-sm"
+              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none text-sm"
             />
+
             <div className="flex gap-3">
               <input
                 type="text"
@@ -167,7 +193,7 @@ function Register() {
                 placeholder="Family Code"
                 value={form.family_code}
                 onChange={handleChange}
-                className="w-1/2 bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none transition-all text-sm"
+                className="w-1/2 bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none text-sm"
               />
               <input
                 type="text"
@@ -175,7 +201,7 @@ function Register() {
                 placeholder="Mandir Code"
                 value={form.mandir_code}
                 onChange={handleChange}
-                className="w-1/2 bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none transition-all text-sm"
+                className="w-1/2 bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none text-sm"
               />
             </div>
 
@@ -185,7 +211,7 @@ function Register() {
               placeholder="Password"
               value={form.password}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none transition-all text-sm"
+              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none text-sm"
             />
 
             <input
@@ -194,14 +220,28 @@ function Register() {
               placeholder="Confirm Password"
               value={form.confirmPassword}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none transition-all text-sm"
+              className="w-full bg-stone-50 border border-stone-200 p-3 rounded-lg focus:ring-2 focus:ring-slate-400 outline-none text-sm"
             />
 
+            {/* ✅ Button with loading state */}
             <button
               type="submit"
-              className="w-full bg-slate-800 text-white py-3 rounded-lg font-bold shadow hover:bg-slate-900 transition-all active:scale-[0.98] mt-2"
+              disabled={loading}
+              className={`w-full py-3 rounded-lg font-bold shadow transition-all mt-2 flex items-center justify-center
+                ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white"
+                }`}
             >
-              Sign Up
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Creating Account...
+                </span>
+              ) : (
+                "Sign Up"
+              )}
             </button>
           </form>
 
